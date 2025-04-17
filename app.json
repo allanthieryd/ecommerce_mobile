@@ -1,7 +1,7 @@
 {
   "expo": {
-    "name": "ecommerce_mobile",
-    "slug": "ecommerce_mobile",
+    "name": "expo-nativewind-template",
+    "slug": "expo-nativewind-template",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
@@ -15,7 +15,8 @@
       "adaptiveIcon": {
         "foregroundImage": "./assets/images/adaptive-icon.png",
         "backgroundColor": "#ffffff"
-      }
+      },
+      "package": "com.ayanwdev.exponativewindtemplate"
     },
     "web": {
       "bundler": "metro",
@@ -32,10 +33,17 @@
           "resizeMode": "contain",
           "backgroundColor": "#ffffff"
         }
-      ]
+      ],
+      "expo-font",
+      "expo-asset"
     ],
     "experiments": {
       "typedRoutes": true
+    },
+    "extra": {
+      "eas": {
+        "projectId": "2af9edde-19fe-496c-ac2b-7f40675abc88"
+      }
     }
   }
 }
