@@ -14,7 +14,7 @@ const CartPage = () => {
   ]);
 
   // Fonction pour supprimer un article du panier
-  const removeItem = (id) => {
+  const removeItem = (id: any) => {
     setCartItems(cartItems.filter((item) => item.id !== id));
   };
 

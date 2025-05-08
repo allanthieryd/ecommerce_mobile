@@ -11,7 +11,7 @@ export interface Produit {
   image_url: string;
 }
 
-export default function Index() {
+export default function HomePage() {
   const [produits, setProduits] = useState<Produit[]>([]);
 
   useEffect(() => {
