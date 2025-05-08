@@ -11,7 +11,7 @@ export type TabScreenOptions = {
 
 export default function RootLayout() {
   const TabScreens: TabScreenOptions[] = [
-    { name: "index", title: "Home", icon: "home" },
+    { name: "index", title: "Accueil", icon: "home" },
     { name: "search", title: "Search", icon: "search" },
     { name: "account", title: "Account", icon: "person" },
   ];

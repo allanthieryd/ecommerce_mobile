@@ -34,8 +34,12 @@ export const uploadProductImage = async (
 }
 
 export const getProductImageUrl = (filePath: string): string => {
+  if (!filePath) return "";
+
   const { data } = supabase.storage
-    .from("produits-images")
-    .getPublicUrl(filePath)
-  return data.publicUrl
-}
+    .from("produits-images") // toujours ce bucket
+    .getPublicUrl(filePath); // filePath peut être "computer-vision.jpg" ou "produits/67/filename.jpg"
+
+  return data.publicUrl;
+};
+
