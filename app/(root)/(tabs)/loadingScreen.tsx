@@ -1,4 +1,4 @@
-import { Text, View, Image } from "react-native";
+import {View, Image } from "react-native";
 
 export default function loadingScreen() {
   return (

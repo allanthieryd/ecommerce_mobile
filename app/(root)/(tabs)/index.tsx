@@ -1,4 +1,4 @@
-import { Text, View, FlatList } from "react-native";
+import { Text, View, FlatList, TouchableOpacity } from "react-native";
 import { useState, useEffect } from "react";
 import { supabase } from '@/utils/supabase';
 import { getProductImageUrl } from '@/services/productService';
@@ -32,22 +32,23 @@ export default function Index() {
   }, []);
 
   return (
-    <View className="bg-white flex-1 items-center justify-center">
+    <View className="flex-1 bg-white px-4 py-6">
+      <Text className="text-center text-2xl font-bold mb-6">OUR SOLUTIONS</Text>
       <FlatList
         data={produits}
+        numColumns={2}
         keyExtractor={(item) => item.id_produit.toString()}
+        columnWrapperStyle={{ justifyContent: 'space-between' }}
         renderItem={({ item }) => {
-        const imageUrl = item.image_url ? getProductImageUrl(item.image_url) : null;
+          const imageUrl = item.image_url ? getProductImageUrl(item.image_url) : null;
 
-        return (
-          <View className="p-4 border-b border-gray-300">
-            <Text className="text-xl font-semibold">{item.nom}</Text>
-            <Text className="text-sm text-gray-600">{item.description}</Text>
-
-            <ProductImage uri={imageUrl} />
-          </View>
-        );
-      }}
+          return (
+            <TouchableOpacity className="w-[48%] bg-gray-100 rounded-lg items-center justify-center p-4 mb-4 shadow-md">
+              <ProductImage uri={imageUrl}  />
+              <Text className="text-center text-lg font-semibold">{item.nom}</Text>
+            </TouchableOpacity>
+          );
+        }}
       />
     </View>
   );
