@@ -3,7 +3,8 @@ import { useState, useEffect } from "react";
 import { supabase } from '@/utils/supabase';
 import { getProductImageUrl } from '@/services/productService';
 import ProductImage from "@/components/ProductImage";
-
+import { Link } from "expo-router";
+import type { RelativePathString } from "expo-router";
 export interface Produit {
   id_produit: number;
   nom: string;
@@ -43,10 +44,12 @@ export default function HomePage() {
           const imageUrl = item.image_url ? getProductImageUrl(item.image_url) : null;
 
           return (
-            <TouchableOpacity className="w-[48%] bg-gray-100 rounded-lg items-center justify-center p-4 mb-4 shadow-md">
-              <ProductImage uri={imageUrl}  />
-              <Text className="text-center text-lg font-semibold">{item.nom}</Text>
-            </TouchableOpacity>
+            <Link href={`/pages/product/${item.id_produit}` as RelativePathString} asChild>
+              <TouchableOpacity className="w-[48%] bg-gray-100 rounded-lg items-center justify-center p-4 mb-4 shadow-md">
+                <ProductImage uri={imageUrl} />
+                <Text className="text-center text-lg font-semibold">{item.nom}</Text>
+              </TouchableOpacity>
+            </Link>
           );
         }}
       />
