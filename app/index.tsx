@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { View, Text, TouchableOpacity, Image } from "react-native";
 import { Link, useRouter } from "expo-router"; // Importation de useRouter pour la redirection
-import { checkUserSession } from "../utils/auth"; // Assure-toi que le chemin d'importation est correct
+import { checkUserSession } from "@/utils/auth"; // Assure-toi que le chemin d'importation est correct
 
 const IndexPage = () => {
   const [isLoggedIn, setIsLoggedIn] = useState<boolean | null>(null);

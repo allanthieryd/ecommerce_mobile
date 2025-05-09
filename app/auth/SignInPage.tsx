@@ -2,18 +2,20 @@ import React, { useState } from "react"
 import { View, Text, TextInput, TouchableOpacity, Image, Alert } from "react-native"
 import { Ionicons } from "@expo/vector-icons"
 import { loginUser } from "@/services/login"
+import { useRouter } from "expo-router"
 
 const SignInPage = () => {
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
   const [passwordVisible, setPasswordVisible] = useState(false)
+  const router = useRouter()
 
   const handleLogin = async () => {
     try {
       // Appel de la fonction loginUser avec email et mot de passe
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
       const user = await loginUser(email, password)
-      Alert.alert("Connexion réussie", `Bienvenue ${user.email}`)
-      // Ajoute ici la navigation ou le redirection vers une autre page
+      router.push("/pages/homepage");
     } catch (error: any) {
       Alert.alert("Erreur", error.message)
     }

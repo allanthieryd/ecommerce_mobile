@@ -33,7 +33,7 @@ export default function HomePage() {
 
   return (
     <View className="flex-1 bg-white px-4 py-6">
-      <Text className="text-center text-2xl font-bold mb-6">OUR SOLUTIONS</Text>
+      <Text className="text-center text-2xl font-bold mb-6">NOS SOLUTIONS</Text>
       <FlatList
         data={produits}
         numColumns={2}
