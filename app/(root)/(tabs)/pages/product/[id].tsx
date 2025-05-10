@@ -1,10 +1,11 @@
 // app/produit/[id].tsx
 import { useLocalSearchParams } from "expo-router";
-import { View, Text, Image } from "react-native";
+import { View, Text } from "react-native";
 import { useEffect, useLayoutEffect, useState } from "react";
 import { supabase } from "@/utils/supabase";
 import { getProductImageUrl } from "@/services/productService";
 import { useNavigation } from "expo-router";
+import ProductImageCarousel from "@/components/ProductImageCarousel";
 
 export default function ProductDetail() {
   const { id } = useLocalSearchParams(); // ← récupère l'ID de l'URL
@@ -43,15 +44,13 @@ export default function ProductDetail() {
       </View>
     );
   }
+  const imageUrl = produit.image_url ? getProductImageUrl(produit.image_url) : null;
 
   return (
-    <View className="flex-1 bg-white p-6">
-      <Image
-        source={{ uri: getProductImageUrl(produit.image_url) }}
-        style={{ width: "100%", height: 200, resizeMode: "contain" }}
-      />
-      <Text className="text-2xl font-bold mt-4">{produit.nom}</Text>
-      <Text className="mt-2 text-gray-700">{produit.description}</Text>
+    <View className="flex-1 bg-white dark:bg-gray-800 p-6">
+      <ProductImageCarousel uri={imageUrl} />
+      <Text className="text-2xl font-bold mt-4 dark:text-white">{produit.nom}</Text>
+      <Text className="mt-2 text-gray-700 dark:text-white">{produit.description}</Text>
     </View>
   );
 }

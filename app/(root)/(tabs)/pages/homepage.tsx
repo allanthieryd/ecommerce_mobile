@@ -33,8 +33,8 @@ export default function HomePage() {
   }, []);
 
   return (
-    <View className="flex-1 bg-white px-4 py-6">
-      <Text className="text-center text-2xl font-bold mb-6">NOS SOLUTIONS</Text>
+    <View className="flex-1 bg-white dark:bg-gray-800 px-4 py-6">
+      <Text className="text-center text-2xl font-bold mb-6 dark:text-white">NOS SOLUTIONS</Text>
       <FlatList
         data={produits}
         numColumns={2}
@@ -45,9 +45,9 @@ export default function HomePage() {
 
           return (
             <Link href={`/pages/product/${item.id_produit}` as RelativePathString} asChild>
-              <TouchableOpacity className="w-[48%] bg-gray-100 rounded-lg items-center justify-center p-4 mb-4 shadow-md">
+              <TouchableOpacity className="w-[48%] bg-gray-100 dark:bg-slate-700 rounded-lg items-center justify-center p-4 mb-4 shadow-md">
                 <ProductImage uri={imageUrl} />
-                <Text className="text-center text-lg font-semibold">{item.nom}</Text>
+                <Text className="text-center text-lg font-semibold dark:text-white">{item.nom}</Text>
               </TouchableOpacity>
             </Link>
           );

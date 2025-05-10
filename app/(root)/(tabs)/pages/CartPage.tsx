@@ -12,6 +12,7 @@ import {
 import { Ionicons } from "@expo/vector-icons"
 import { useRouter } from "expo-router"
 import { supabase } from "@/utils/supabase"
+import BackArrow from "@/components/BackArrow"
 
 interface CartItem {
   articleId: number
@@ -101,12 +102,12 @@ const CartPage = () => {
   )
 
   return (
-    <View className="flex-1 bg-white">
-      <View className="flex-row items-center px-4 py-4 bg-white shadow-md">
+    <View className="flex-1 bg-white dark:bg-gray-800 ">
+      <View className="flex-row items-center px-4 py-4 bg-white dark:bg-gray-800 shadow-md dark:border-b dark:border-gray-900">
         <TouchableOpacity onPress={() => router.back()}>
-          <Ionicons name="arrow-back-outline" size={24} color="black" />
+          <BackArrow />
         </TouchableOpacity>
-        <Text className="text-xl font-bold text-black ml-4">Mon panier</Text>
+        <Text className="text-xl font-bold text-black dark:text-white ml-4">Mon panier</Text>
       </View>
 
       {loading ? (
@@ -118,12 +119,12 @@ const CartPage = () => {
           data={cartItems}
           keyExtractor={(item) => item.articleId.toString()}
           renderItem={({ item }) => (
-            <View className="flex-row items-center justify-between bg-gray-200 rounded-lg p-4 m-4">
+            <View className="flex-row items-center justify-between bg-gray-200 dark:bg-slate-700 rounded-lg p-4 m-4">
               <View className="flex-1 pr-2">
-                <Text className="text-black text-lg">{item.productName}</Text>
+                <Text className="text-black dark:text-white text-lg">{item.productName}</Text>
                 <View className="flex-row items-center mt-1">
                   <TextInput
-                    className="bg-white border border-gray-300 rounded px-2 py-1 w-16 text-center mr-2"
+                    className="bg-white dark:bg-gray-800 border border-gray-300 dark:border-slate-500 rounded px-2 py-1 w-16 text-center mr-2 dark:text-white"
                     keyboardType="number-pad"
                     value={quantityInputs[item.productId] || ""}
                     onChangeText={(text) => handleInputChange(item.productId, text)}
@@ -132,7 +133,7 @@ const CartPage = () => {
                       Keyboard.dismiss()
                     }}
                   />
-                  <Text className="text-gray-600">× {item.productPrice} €</Text>
+                  <Text className="text-gray-600 dark:text-white">× {item.productPrice} €</Text>
                 </View>
               </View>
               <TouchableOpacity>
@@ -145,7 +146,7 @@ const CartPage = () => {
 
       {!loading && cartItems.length > 0 && (
         <View className="px-4 pb-6">
-          <Text className="text-right text-lg font-semibold mb-2">
+          <Text className="text-right text-lg font-semibold mb-2 dark:text-white">
             Total : {totalPrice.toFixed(2)} €
           </Text>
           <TouchableOpacity className="bg-purple-500 py-4 rounded-md items-center">
