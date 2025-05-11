@@ -3,7 +3,8 @@ import { useState, useEffect } from "react";
 import { supabase } from '@/utils/supabase';
 import { getProductImageUrl } from '@/services/productService';
 import ProductImage from "@/components/ProductImage";
-
+import { Link } from "expo-router";
+import type { RelativePathString } from "expo-router";
 export interface Produit {
   id_produit: number;
   nom: string;
@@ -11,7 +12,7 @@ export interface Produit {
   image_url: string;
 }
 
-export default function Index() {
+export default function HomePage() {
   const [produits, setProduits] = useState<Produit[]>([]);
   const [searchQuery, setSearchQuery] = useState(''); // État pour la barre de recherche
   const [filteredProduits, setFilteredProduits] = useState<Produit[]>([]); // Produits filtrés
@@ -43,17 +44,8 @@ export default function Index() {
   }, [searchQuery, produits]);
 
   return (
-    <View className="flex-1 bg-white px-4 py-6">
-      <Text className="text-center text-2xl font-bold mb-6">OUR SOLUTIONS</Text>
-
-      {/* Barre de recherche */}
-      <TextInput
-        className="bg-gray-200 rounded-lg px-4 py-2 mb-4"
-        placeholder="Rechercher un produit..."
-        value={searchQuery}
-        onChangeText={setSearchQuery}
-      />
-
+    <View className="flex-1 bg-white dark:bg-gray-800 px-4 py-6">
+      <Text className="text-center text-2xl font-bold mb-6 dark:text-white">NOS SOLUTIONS</Text>
       <FlatList
         data={filteredProduits} // Utiliser les produits filtrés
         numColumns={2}
@@ -63,10 +55,12 @@ export default function Index() {
           const imageUrl = item.image_url ? getProductImageUrl(item.image_url) : null;
 
           return (
-            <TouchableOpacity className="w-[48%] bg-gray-100 rounded-lg items-center justify-center p-4 mb-4 shadow-md">
-              <ProductImage uri={imageUrl} />
-              <Text className="text-center text-lg font-semibold">{item.nom}</Text>
-            </TouchableOpacity>
+            <Link href={`/pages/product/${item.id_produit}` as RelativePathString} asChild>
+              <TouchableOpacity className="w-[48%] bg-gray-100 dark:bg-slate-700 rounded-lg items-center justify-center p-4 mb-4 shadow-md">
+                <ProductImage uri={imageUrl} />
+                <Text className="text-center text-lg font-semibold dark:text-white">{item.nom}</Text>
+              </TouchableOpacity>
+            </Link>
           );
         }}
       />
