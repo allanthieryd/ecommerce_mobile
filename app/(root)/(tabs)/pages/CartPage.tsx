@@ -7,15 +7,17 @@ import {
   TouchableOpacity,
   Alert,
   ActivityIndicator,
-  Keyboard
+  Keyboard,
 } from "react-native"
 import { Ionicons } from "@expo/vector-icons"
 import { useRouter } from "expo-router"
 import { supabase } from "@/utils/supabase"
 import BackArrow from "@/components/BackArrow"
+import { fetchCart, updateCartItem, deleteCartItem } from "@/services/cart"
 
 interface CartItem {
   articleId: number
+  commandId: number
   productId: number
   productName: string
   quantity: number
@@ -29,80 +31,144 @@ const CartPage = () => {
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    fetchCart()
+    loadCart()
   }, [])
 
-  const fetchCart = async () => {
+  const loadCart = async () => {
     setLoading(true)
     try {
       const { data: sessionData, error: sessionError } = await supabase.auth.getSession()
       if (sessionError || !sessionData.session) throw new Error("Non authentifié.")
       const userId = sessionData.session.user.id
 
-      const { data: cart, error } = await supabase
-        .from("panier")
-        .select("id_article, id_produit, quantite, prix_unitaire, nom")
-        .eq("id_utilisateur", userId)
+      const rawCart = await fetchCart(userId)
+      
+      // Vérifier si rawCart contient des données
+      if (!rawCart || rawCart.length === 0) {
+        setCartItems([])
+        setLoading(false)
+        return
+      }
 
-      if (error) throw error
+      // console.log("Données brutes du panier:", JSON.stringify(rawCart, null, 2))
+      
+      // Mapper les données avec les bons noms de champs
+      const formatted = rawCart
+        .filter((item: any) => {
+          // Vérifier que les propriétés nécessaires existent
+          if (!item || !item.id_produit) {
+            console.warn("Article invalide:", item)
+            return false
+          }
+          return true
+        })
+        .map((item: any) => {
+          // Créer un objet CartItem avec toutes les propriétés nécessaires
+          const cartItem = {
+            articleId: item.id_article || 0,
+            commandId: item.id_commande || 0,
+            productId: item.id_produit,
+            productName: item.nom || "Produit sans nom",
+            quantity: item.quantite || 1,
+            productPrice: item.prix_unitaire || 0
+          }
+          return cartItem
+        })
 
-      const formatted = cart.map((item) => ({
-        articleId: item.id_article,
-        productId: item.id_produit,
-        productName: item.nom,
-        quantity: item.quantite,
-        productPrice: item.prix_unitaire,
-      }))
-
+      // console.log("Panier formaté:", formatted)
       setCartItems(formatted)
 
-      // Initialiser les inputs
+      // Initialiser les inputs avec les quantités
       const inputs: Record<number, string> = {}
       formatted.forEach((item) => {
-        inputs[item.productId] = item.quantity.toString()
+        if (item.productId && item.quantity) {
+          inputs[item.productId] = item.quantity.toString()
+        }
       })
       setQuantityInputs(inputs)
     } catch (err) {
       Alert.alert("Erreur", "Impossible de charger le panier.")
-      console.error(err)
+      console.error("Erreur loadCart:", err)
     } finally {
       setLoading(false)
     }
   }
 
   const handleInputChange = (productId: number, value: string) => {
+    if (!productId) return
     setQuantityInputs((prev) => ({
       ...prev,
       [productId]: value,
     }))
   }
 
-  const handleQuantityUpdate = (productId: number, inputValue: string) => {
+  const handleQuantityUpdate = async (productId: number, inputValue: string) => {
+    if (!productId) return
+    
     const newQuantity = parseInt(inputValue)
-    if (isNaN(newQuantity) || newQuantity < 1) {
-      const currentItem = cartItems.find((item) => item.productId === productId)
-      if (currentItem) {
-        setQuantityInputs((prev) => ({
-          ...prev,
-          [productId]: currentItem.quantity.toString(),
-        }))
-      }
+  
+    const currentItem = cartItems.find((item) => item.productId === productId)
+    if (!currentItem) {
+      console.warn("Article introuvable pour productId:", productId)
       return
     }
-
-    const updatedCart = cartItems.map((item) =>
-      item.productId === productId ? { ...item, quantity: newQuantity } : item
-    )
-    setCartItems(updatedCart)
+  
+    if (isNaN(newQuantity) || newQuantity < 1) {
+      // Rétablir la valeur précédente
+      setQuantityInputs((prev) => ({
+        ...prev,
+        [productId]: currentItem.quantity.toString(),
+      }))
+      return
+    }
+  
+    try {
+      // Déterminer quel ID utiliser pour la mise à jour
+      const updateId = currentItem.commandId || currentItem.articleId
+      if (!updateId) {
+        console.error("ID de commande manquant pour la mise à jour")
+        return
+      }
+      
+      await updateCartItem({ id_commande: updateId, quantite: newQuantity })
+  
+      const updatedCart = cartItems.map((item) =>
+        item.productId === productId ? { ...item, quantity: newQuantity } : item
+      )
+      setCartItems(updatedCart)
+    } catch (error) {
+      Alert.alert("Erreur", "La mise à jour du panier a échoué.")
+      console.error("Erreur de mise à jour:", error)
+    }
+  }
+  
+  const handleDeleteItem = async (commandId: number, productId: number) => {
+    if (!commandId || !productId) {
+      console.error("IDs manquants pour la suppression:", { commandId, productId })
+      return
+    }
+    
+    try {
+      await deleteCartItem(commandId, productId)
+      setCartItems((prev) =>
+        prev.filter(
+          (item) =>
+            !(item.commandId === commandId && item.productId === productId)
+        )
+      )
+    } catch (err) {
+      Alert.alert("Erreur", "Impossible de supprimer le produit.")
+      console.error("Erreur de suppression:", err)
+    }
   }
 
   const totalPrice = cartItems.reduce(
-    (acc, item) => acc + item.productPrice * item.quantity,
+    (acc, item) => acc + (item.productPrice || 0) * (item.quantity || 0),
     0
   )
 
   return (
-    <View className="flex-1 bg-white dark:bg-gray-800 ">
+    <View className="flex-1 bg-white dark:bg-gray-800">
       <View className="flex-row items-center px-4 py-4 bg-white dark:bg-gray-800 shadow-md dark:border-b dark:border-gray-900">
         <TouchableOpacity onPress={() => router.back()}>
           <BackArrow />
@@ -114,10 +180,20 @@ const CartPage = () => {
         <View className="flex-1 justify-center items-center">
           <ActivityIndicator size="large" color="#6B21A8" />
         </View>
+      ) : cartItems.length === 0 ? (
+        <View className="flex-1 justify-center items-center">
+          <Text className="text-black dark:text-white text-lg">Votre panier est vide</Text>
+          <TouchableOpacity 
+            className="bg-purple-500 py-3 px-4 rounded-md items-center mt-4"
+            onPress={() => router.push("/")}
+          >
+            <Text className="text-white">Continuer mes achats</Text>
+          </TouchableOpacity>
+        </View>
       ) : (
         <FlatList
           data={cartItems}
-          keyExtractor={(item) => item.articleId.toString()}
+          keyExtractor={(item, index) => `${item.productId}-${index}`}
           renderItem={({ item }) => (
             <View className="flex-row items-center justify-between bg-gray-200 dark:bg-slate-700 rounded-lg p-4 m-4">
               <View className="flex-1 pr-2">
@@ -126,7 +202,7 @@ const CartPage = () => {
                   <TextInput
                     className="bg-white dark:bg-gray-800 border border-gray-300 dark:border-slate-500 rounded px-2 py-1 w-16 text-center mr-2 dark:text-white"
                     keyboardType="number-pad"
-                    value={quantityInputs[item.productId] || ""}
+                    value={quantityInputs[item.productId] || item.quantity.toString()}
                     onChangeText={(text) => handleInputChange(item.productId, text)}
                     onBlur={() => {
                       handleQuantityUpdate(item.productId, quantityInputs[item.productId])
@@ -136,7 +212,7 @@ const CartPage = () => {
                   <Text className="text-gray-600 dark:text-white">× {item.productPrice} €</Text>
                 </View>
               </View>
-              <TouchableOpacity>
+              <TouchableOpacity onPress={() => handleDeleteItem(item.commandId, item.productId)}>
                 <Ionicons name="trash-outline" size={24} color="red" />
               </TouchableOpacity>
             </View>

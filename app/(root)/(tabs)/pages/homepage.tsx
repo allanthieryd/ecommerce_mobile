@@ -1,7 +1,7 @@
-import { Text, View, FlatList, TouchableOpacity, TextInput } from "react-native";
+import { Text, View, FlatList, TouchableOpacity } from "react-native";
 import { useState, useEffect } from "react";
-import { supabase } from '@/utils/supabase';
 import { getProductImageUrl } from '@/services/productService';
+import { fetchProducts } from '@/services/product';
 import ProductImage from "@/components/ProductImage";
 import { Link } from "expo-router";
 import type { RelativePathString } from "expo-router";
@@ -14,25 +14,20 @@ export interface Produit {
 
 export default function HomePage() {
   const [produits, setProduits] = useState<Produit[]>([]);
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [searchQuery, setSearchQuery] = useState(''); // État pour la barre de recherche
   const [filteredProduits, setFilteredProduits] = useState<Produit[]>([]); // Produits filtrés
 
   useEffect(() => {
-    const fetchProduits = async () => {
-      const { data, error } = await supabase
-        .from('produits')
-        .select('id_produit, nom, description, image_url');
-
-      if (error) {
-        console.error('Erreur de récupération des produits:', error);
-        return;
+    const fetchData = async () => {
+      try {
+        const data = await fetchProducts();
+        setProduits(data);
+      } catch (err) {
+        console.error(err);
       }
-
-      setProduits(data);
-      setFilteredProduits(data); // Initialiser les produits filtrés
     };
-
-    fetchProduits();
+    fetchData();
   }, []);
 
   // Mettre à jour les produits filtrés en fonction de la recherche
