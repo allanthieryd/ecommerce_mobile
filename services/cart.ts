@@ -27,14 +27,14 @@ export const addToCart = async (item: {
 };
 
 export const updateCartItem = async (item: {
-  id_commande: number;
+  id_produit: number;
   quantite?: number;
   prix_unitaire?: number;
 }) => {
   const { data, error } = await supabase
     .from('panier')
     .update(item)
-    .eq('id_commande', item.id_commande)
+    .eq('id_produit', item.id_produit)
     .select();
 
   if (error) throw new Error("Erreur lors de la mise à jour du panier");

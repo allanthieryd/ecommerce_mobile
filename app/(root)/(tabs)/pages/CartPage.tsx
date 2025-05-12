@@ -14,6 +14,8 @@ import { useRouter } from "expo-router"
 import { supabase } from "@/utils/supabase"
 import BackArrow from "@/components/BackArrow"
 import { fetchCart, updateCartItem, deleteCartItem } from "@/services/cart"
+import { useFocusEffect } from "expo-router"
+import { useCallback } from "react"
 
 interface CartItem {
   articleId: number
@@ -29,6 +31,45 @@ const CartPage = () => {
   const [cartItems, setCartItems] = useState<CartItem[]>([])
   const [quantityInputs, setQuantityInputs] = useState<Record<number, string>>({})
   const [loading, setLoading] = useState(true)
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const [userInfo, setUserInfo] = useState<{ nom: string; prenom: string; email: string } | null>(null)
+
+  useFocusEffect(
+    useCallback(() => {
+      loadCart()
+    }, [])
+  )  
+
+  useEffect(() => {
+    const fetchUserData = async () => {
+      try {
+        const { data: sessionData, error: sessionError } = await supabase.auth.getSession()
+  
+        if (sessionError || !sessionData?.session?.user) {
+          router.push("/auth/SignInPage")
+          return
+        }
+  
+        const user = sessionData.session.user
+  
+        const { data: userData, error } = await supabase
+          .from("utilisateurs")
+          .select("nom, prenom, email")
+          .eq("id_utilisateur", user.id)
+          .single()
+  
+        if (error) throw new Error("Erreur lors de la récupération des informations utilisateur.")
+  
+        setUserInfo(userData)
+      } catch (error) {
+        console.error("Erreur lors de la récupération des données utilisateur :", error)
+      }
+    }
+  
+    fetchUserData()
+  }, [router])
+  
+
 
   useEffect(() => {
     loadCart()
@@ -93,7 +134,7 @@ const CartPage = () => {
       setLoading(false)
     }
   }
-
+  
   const handleInputChange = (productId: number, value: string) => {
     if (!productId) return
     setQuantityInputs((prev) => ({
@@ -130,7 +171,7 @@ const CartPage = () => {
         return
       }
       
-      await updateCartItem({ id_commande: updateId, quantite: newQuantity })
+      await updateCartItem({ id_produit: updateId, quantite: newQuantity })
   
       const updatedCart = cartItems.map((item) =>
         item.productId === productId ? { ...item, quantity: newQuantity } : item
