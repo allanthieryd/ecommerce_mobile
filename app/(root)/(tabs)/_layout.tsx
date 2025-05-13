@@ -16,6 +16,7 @@ export default function RootLayout() {
     { name: "pages/account", title: "Mon compte", icon: "person" },
     { name: "pages/cartpage", title: "Panier", icon: "cart" },
     { name: "pages/product/[id]", title: "Produit", icon: "images" },
+    { name: "pages/contact", title: "Contact", icon: "mail" },
   ];
   return (
     <Tabs

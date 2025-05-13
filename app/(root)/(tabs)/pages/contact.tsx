@@ -1,16 +1,16 @@
 import React, { useState } from "react";
-import { 
-  View, 
-  Text, 
-  TextInput, 
-  TouchableOpacity, 
-  StyleSheet, 
-  ScrollView, 
+import {
+  View,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  ScrollView,
   Alert,
   KeyboardAvoidingView,
   Platform,
-  ActivityIndicator
+  ActivityIndicator,
 } from "react-native";
+import { addMessage } from "@/services/contact";
 
 export default function ContactPage() {
   const [email, setEmail] = useState("");
@@ -21,11 +21,10 @@ export default function ContactPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [status, setStatus] = useState({ success: false, message: "" });
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     setIsSubmitting(true);
     setStatus({ success: false, message: "" });
-
-    // Validation des champs obligatoires
+  
     if (!email || !nom || !prenom) {
       setStatus({
         success: false,
@@ -34,78 +33,96 @@ export default function ContactPage() {
       setIsSubmitting(false);
       return;
     }
-
-    // Simulation d'envoi
-    setTimeout(() => {
+  
+    try {
+      await addMessage({
+        nom,
+        prenom,
+        email,
+        num,
+        message,
+      });
+  
       setStatus({
         success: true,
-        message: "Votre message a été envoyé avec succès! (simulation)"
+        message: "Votre message a été envoyé avec succès !"
       });
-      
-      // Réinitialiser le formulaire
+  
       setEmail("");
       setNom("");
       setPrenom("");
       setNum("");
       setMessage("");
+  
+      Alert.alert("Succès", "Votre message a été envoyé avec succès !");
+    } catch (error) {
+      console.error(error);
+      setStatus({
+        success: false,
+        message: "Une erreur est survenue. Veuillez réessayer plus tard."
+      });
+    } finally {
       setIsSubmitting(false);
-      
-      Alert.alert("Succès", "Votre message a été envoyé avec succès!");
-    }, 1000);
-  };
+    }
+  };  
 
   return (
     <KeyboardAvoidingView
       behavior={Platform.OS === "ios" ? "padding" : "height"}
-      style={styles.container}
+      className="flex-1 bg-gray-50"
     >
-      <ScrollView contentContainerStyle={styles.scrollContainer}>
-        <View style={styles.header}>
-          <Text style={styles.headerText}>
+      <ScrollView contentContainerStyle={{ flexGrow: 1 }} className="py-6 px-4">
+        <View className="mb-6 items-center">
+          <Text className="text-2xl font-bold">
             Formulaire de{" "}
-            <Text style={styles.headerHighlight}>Contact</Text>
+            <Text className="text-[#02ff1e] font-bold">Contact</Text>
           </Text>
         </View>
-        
-        <View style={styles.formContainer}>
+
+        <View className="bg-white rounded-lg p-4 shadow-md">
           {status.message ? (
-            <View style={[
-              styles.statusBox,
-              status.success ? styles.successBox : styles.errorBox
-            ]}>
-              <Text style={status.success ? styles.successText : styles.errorText}>
+            <View
+              className={`p-3 rounded mb-4 ${
+                status.success ? "bg-green-100" : "bg-red-100"
+              }`}
+            >
+              <Text
+                className={`${
+                  status.success ? "text-green-700" : "text-red-700"
+                }`}
+              >
                 {status.message}
               </Text>
             </View>
           ) : null}
-          
-          <Text style={styles.label}>
-            Nom <Text style={styles.required}>*</Text>
+
+          <Text className="text-violet-600 font-bold mt-4 mb-1 text-base">
+            Nom <Text className="text-red-500">*</Text>
           </Text>
           <TextInput
-            style={styles.input}
+            className="border border-gray-200 bg-violet-100 rounded px-3 py-2 text-gray-700 text-base"
             value={nom}
             onChangeText={setNom}
             placeholder="Votre nom"
             placeholderTextColor="#9CA3AF"
           />
-          
-          <Text style={styles.label}>
-            Prénom <Text style={styles.required}>*</Text>
+
+          <Text className="text-violet-600 font-bold mt-4 mb-1 text-base">
+            Prénom <Text className="text-red-500">*</Text>
           </Text>
           <TextInput
-            style={styles.input}
+            className="border border-gray-200 bg-violet-100 rounded px-3 py-2 text-gray-700 text-base"
             value={prenom}
             onChangeText={setPrenom}
             placeholder="Votre prénom"
             placeholderTextColor="#9CA3AF"
           />
-          
-          <Text style={styles.label}>
-            E-mail <Text style={styles.required}>*</Text>
+
+          <Text className="text-violet-600 font-bold mt-4 mb-1 text-base">
+            E-mail <Text className="text-red-500">*</Text>
           </Text>
           <TextInput
-            style={styles.input}
+            className="border border-gray-200 bg-violet-100 rounded px-3 py-2 text-gray-700 text-base"
             value={email}
             onChangeText={setEmail}
             placeholder="Votre email"
@@ -113,20 +130,24 @@ export default function ContactPage() {
             keyboardType="email-address"
             autoCapitalize="none"
           />
-          
-          <Text style={styles.label}>Numéro de téléphone</Text>
+
+          <Text className="text-violet-600 font-bold mt-4 mb-1 text-base">
+            Numéro de téléphone
+          </Text>
           <TextInput
-            style={styles.input}
+            className="border border-gray-200 bg-violet-100 rounded px-3 py-2 text-gray-700 text-base"
             value={num}
             onChangeText={setNum}
             placeholder="Votre numéro de téléphone"
             placeholderTextColor="#9CA3AF"
             keyboardType="phone-pad"
           />
-          
-          <Text style={styles.label}>Message</Text>
+
+          <Text className="text-violet-600 font-bold mt-4 mb-1 text-base">
+            Message
+          </Text>
           <TextInput
-            style={styles.messageInput}
+            className="border border-gray-200 bg-violet-100 rounded px-3 py-2 text-gray-700 text-base min-h-[120px] text-top"
             value={message}
             onChangeText={setMessage}
             placeholder="Votre message"
@@ -135,16 +156,18 @@ export default function ContactPage() {
             numberOfLines={5}
             textAlignVertical="top"
           />
-          
+
           <TouchableOpacity
-            style={[styles.button, isSubmitting && styles.buttonDisabled]}
+            className={`bg-violet-600 rounded-full py-3 px-6 mt-6 min-w-[60%] self-center items-center ${
+              isSubmitting ? "opacity-70" : ""
+            }`}
             onPress={handleSubmit}
             disabled={isSubmitting}
           >
             {isSubmitting ? (
               <ActivityIndicator color="#FFFFFF" size="small" />
             ) : (
-              <Text style={styles.buttonText}>Envoyer</Text>
+              <Text className="text-white font-bold text-base">Envoyer</Text>
             )}
           </TouchableOpacity>
         </View>
@@ -152,101 +175,3 @@ export default function ContactPage() {
     </KeyboardAvoidingView>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: "#F9FAFB"
-  },
-  scrollContainer: {
-    flexGrow: 1,
-    paddingVertical: 24,
-    paddingHorizontal: 16
-  },
-  header: {
-    marginBottom: 24,
-    alignItems: "center"
-  },
-  headerText: {
-    fontSize: 24,
-    fontWeight: "bold"
-  },
-  headerHighlight: {
-    color: "#02ff1e",
-    fontWeight: "bold"
-  },
-  formContainer: {
-    backgroundColor: "#FFFFFF",
-    borderRadius: 8,
-    padding: 16,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 3,
-    elevation: 2,
-  },
-  label: {
-    color: "#8B5CF6", // violet
-    fontWeight: "bold",
-    marginTop: 16,
-    marginBottom: 6,
-    fontSize: 16
-  },
-  required: {
-    color: "#EF4444", // red
-  },
-  input: {
-    borderWidth: 1,
-    borderColor: "#E5E7EB",
-    backgroundColor: "#EDE9FE", // equivalent to bg-violet-100
-    borderRadius: 4,
-    padding: 10,
-    color: "#4B5563",
-    fontSize: 16
-  },
-  messageInput: {
-    borderWidth: 1,
-    borderColor: "#E5E7EB",
-    backgroundColor: "#EDE9FE",
-    borderRadius: 4,
-    padding: 10,
-    color: "#4B5563",
-    minHeight: 120,
-    fontSize: 16
-  },
-  button: {
-    backgroundColor: "#8B5CF6", // violet
-    borderRadius: 25,
-    paddingVertical: 12,
-    paddingHorizontal: 24,
-    alignSelf: "center",
-    marginTop: 24,
-    minWidth: "60%",
-    alignItems: "center"
-  },
-  buttonDisabled: {
-    opacity: 0.7
-  },
-  buttonText: {
-    color: "#FFFFFF",
-    fontWeight: "bold",
-    fontSize: 16
-  },
-  statusBox: {
-    padding: 12,
-    borderRadius: 4,
-    marginBottom: 16
-  },
-  successBox: {
-    backgroundColor: "#D1FAE5"
-  },
-  errorBox: {
-    backgroundColor: "#FEE2E2"
-  },
-  successText: {
-    color: "#047857"
-  },
-  errorText: {
-    color: "#B91C1C"
-  }
-});
